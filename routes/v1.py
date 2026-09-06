@@ -1,6 +1,5 @@
-from fastapi import FastAPI, Body, Header, File, APIRouter
+from fastapi import Body, File, APIRouter
 from utils.helper_functions import upload_image_to_server
-from models import author
 from models.user import User
 from models.book import Book
 from models.author import Author

@@ -7,44 +7,46 @@ from datetime import datetime
 from fastapi.security import OAuth2PasswordRequestForm
 from utils.security import authenticate_user, create_jwt_token, check_jwt_token
 from models.jwt_user import JWTUser
-from utils.const import TOKEN_DESCRIPTION, TOKEN_SUMMARY, REDIS_URL, TESTING, IS_LOAD_TEST
+from utils.const import TOKEN_DESCRIPTION, TOKEN_SUMMARY, REDIS_URL, TESTING, IS_LOAD_TEST, IS_PRODUCTION, REDIS_URL_PRODUCTION
 from utils.db_object import db
 import utils.redis_object as re
-from utils.redis_object import REDIS_CONNECTION_URL
+# from utils.redis_object import REDIS_CONNECTION_URL
 import redis.asyncio as aioredis
-# from utils.redis_object import check_test_redis
+from utils.redis_object import check_test_redis
 import pickle
-
-
 
 
 app = FastAPI(title="Bookstore API Documentation",description="It's an API thats used for Bookstore", version="1.0.0")
 
-# app.include_router(app_v1, prefix="/v1", dependencies=[Depends(check_jwt_token),Depends(check_test_redis)])
-# app.include_router(app_v2, prefix="/v2", dependencies=[Depends(check_jwt_token),Depends(check_test_redis)])
+app.include_router(app_v1, prefix="/v1", dependencies=[Depends(check_jwt_token),Depends(check_test_redis)],)
+app.include_router(app_v2, prefix="/v2", dependencies=[Depends(check_jwt_token),Depends(check_test_redis)],)
 
-app.include_router(app_v1, prefix="/v1", dependencies=[Depends(check_jwt_token)])
-app.include_router(app_v2, prefix="/v2", dependencies=[Depends(check_jwt_token)])
+# app.include_router(app_v1, prefix="/v1", dependencies=[Depends(check_jwt_token)])
+# app.include_router(app_v2, prefix="/v2", dependencies=[Depends(check_jwt_token)])
 
 
 @app.on_event("startup")
 async def connect_db():
-    # if not TESTING or IS_LOAD_TEST:
-    #     await db.connect()
-    #     re.redis = aioredis.from_url(REDIS_URL)
+    if not TESTING:
+        await db.connect()
+        if IS_PRODUCTION:
+            re.redis = aioredis.from_url(REDIS_URL_PRODUCTION)
+        else:
+            re.redis = aioredis.from_url(REDIS_URL)
 
-    # 1. Connect the Database (respecting your flags)
-    await db.connect()
 
-    # 2. Connect Redis using the CORRECT URL (port 6380 if Load Balancer is True)
-    re.redis = aioredis.from_url(REDIS_CONNECTION_URL)
-
-    print(f"Server started. Connected to Redis at: {REDIS_CONNECTION_URL}")
+    # # 1. Connect the Database (respecting your flags)
+    # await db.connect()
+    #
+    # # 2. Connect Redis using the CORRECT URL (port 6380 if Load Balancer is True)
+    # re.redis = aioredis.from_url(REDIS_CONNECTION_URL)
+    #
+    # print(f"Server started. Connected to Redis at: {REDIS_CONNECTION_URL}")
 
 
 @app.on_event("shutdown")
 async def disconnect_db():
-    if not TESTING or IS_LOAD_TEST:
+    if not TESTING:
         await db.disconnect()
         await re.redis.aclose()
 

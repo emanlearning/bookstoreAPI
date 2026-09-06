@@ -3,7 +3,7 @@ from locust import task, TaskSet, HttpUser
 
 class BookstoreLocust(HttpUser):
 
-    host = "http://localhost:3000"
+    host = "http://192.168.46.218:3000"
 
 
     @task
