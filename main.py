@@ -51,6 +51,11 @@ async def disconnect_db():
         await re.redis.aclose()
 
 
+@app.get("/")
+async def health_check():
+    return {"OK"}
+
+
 @app.post("/token", description=TOKEN_DESCRIPTION, summary=TOKEN_SUMMARY, tags=["Post"])
 async def login_for_token_access(form_data: OAuth2PasswordRequestForm = Depends()):
     redis_key = f"token:{form_data.username},{form_data.password}"
@@ -62,10 +67,11 @@ async def login_for_token_access(form_data: OAuth2PasswordRequestForm = Depends(
         jwt_user = JWTUser(**jwt_user_dict)
         user = await authenticate_user(jwt_user)
 
-        await re.redis.set(redis_key, pickle.dumps(user))
 
         if user is None:
             raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Incorrect username or password.")
+
+        await re.redis.set(redis_key, pickle.dumps(user))
 
     else:
         user = pickle.loads(user)

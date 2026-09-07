@@ -3,12 +3,12 @@ from locust import task, TaskSet, HttpUser
 
 class BookstoreLocust(HttpUser):
 
-    host = "http://192.168.46.218:3000"
+    host = "http://172.18.117.62:80"
 
 
-    @task
-    def token_test(self):
-        self.client.post("/token", data=dict(username="test", password="test"))
+    # @task
+    # def token_test(self):
+    #     self.client.post("/token", data=dict(username="test", password="test"))
 
 
     @task
@@ -17,5 +17,6 @@ class BookstoreLocust(HttpUser):
 	                "password": "pass1",
 	                "role": "admin",
 	                "mail": "a@b.com"}
-        auth_header = {"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0Iiwicm9sZSI6ImFkbWluIiwiZXhwIjoxNzg3OTMyMjA5fQ.Bbo-fCcCs2s7sfjyc6YoDpm7Mq88dJmnVp3nz473L0c"}
+        auth_header = {"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyZGIiLCJyb2xlIjoiYWRtaW4iLCJleHAiOjE3ODkxMDg5MDR9.xGSHBQycGUsPS2miXT3trB15a5oomeJ6wMeg1gqD8u8"}
         self.client.post("/v1/user", json=user_dict, headers=auth_header)
+
