@@ -13,7 +13,7 @@ ISBN_DESCRIPTION = "It is unique identifier for books."
 DB_USER = "admin"
 DB_PASSWORD = "admin"
 DB_HOST = "localhost"
-DB_HOST_PRODUCTION = "172.18.126.31"
+DB_HOST_PRODUCTION = "172.29.85.87"
 DB_NAME = "bookstore"
 DB_URL = (f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}")
 DB_URL_PRODUCTION = (f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST_PRODUCTION}/{DB_NAME}")
@@ -23,7 +23,7 @@ UPLOAD_PHOTO_URL = f"https://api.imgbb.com/1/upload?key={UPLOAD_PHOTO_APIKEY}"
 
 
 REDIS_URL = "redis://localhost"
-REDIS_URL_PRODUCTION = "redis://172.18.126.31"
+REDIS_URL_PRODUCTION = "redis://172.29.85.87"
 
 TESTING = False
 IS_LOAD_TEST = False
