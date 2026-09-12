@@ -5,8 +5,15 @@ from models.book import Book
 from models.author import Author
 from starlette.status import HTTP_201_CREATED
 from starlette.responses import Response
-from utils.db_functions import (db_insert_personel, db_check_personel, db_get_book_with_isbn,
-                                db_get_author, db_get_author_from_id, db_patch_author_name)
+from utils.db_functions import (
+    db_insert_personel,
+    db_check_personel,
+    db_get_book_with_isbn,
+    db_get_author,
+    db_get_author_from_id,
+    db_patch_author_name,
+)
+
 app_v1 = APIRouter()
 import utils.redis_object as re
 import pickle
@@ -17,9 +24,10 @@ async def post_user(user: User):
     await db_insert_personel(user)
     return {"result": "personel is created"}
 
+
 # querry parameters
 @app_v1.post("/login", tags=["Get"])
-async def get_user_validaton(username:str=Body(...), password: str=Body(...)):
+async def get_user_validaton(username: str = Body(...), password: str = Body(...)):
     redis_key = f"{username}:{password}"
     result = await re.redis.get(redis_key)
 
@@ -38,7 +46,12 @@ async def get_user_validaton(username:str=Body(...), password: str=Body(...)):
 
 
 # pet parameters
-@app_v1.get("/book/{isbn}", response_model=Book, response_model_include=["name", "year"], tags=["Get"])
+@app_v1.get(
+    "/book/{isbn}",
+    response_model=Book,
+    response_model_include=["name", "year"],
+    tags=["Get"],
+)
 async def get_book_with_isbn(isbn: str):
     result = await re.redis.get(isbn)
 
@@ -70,11 +83,13 @@ async def get_author_books(id: int, order: str = "asc"):
     else:
         return {"result": "no author with corresponding id"}
 
+
 # patch mean update
 @app_v1.patch("/author/{id}/name")
-async def patch_author_name(id : int, name: str = Body(..., embed=True)):
+async def patch_author_name(id: int, name: str = Body(..., embed=True)):
     await db_patch_author_name(id, name)
     return {"result": "name is updated"}
+
 
 @app_v1.post("/user/author", tags=["Post"])
 async def post_user_and_author(user: User, author: Author):
@@ -82,9 +97,10 @@ async def post_user_and_author(user: User, author: Author):
 
 
 @app_v1.post("/user/photo", tags=["Post"])
-async def upload_user_photo(response:Response, profile_photo: bytes = File(...)):
+async def upload_user_photo(response: Response, profile_photo: bytes = File(...)):
     await upload_image_to_server(profile_photo)
     return {"file_size": len(profile_photo)}
+
 
 # ssh -L 5432:localhost:5432 -N -f ubuntu@<NEW_IP_ADDRESS>
 # sudo docker start bookstore-db

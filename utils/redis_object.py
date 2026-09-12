@@ -1,7 +1,6 @@
 from utils.const import TESTING, TEST_REDIS_URL
 import redis.asyncio as aioredis
 
-
 redis = None
 
 

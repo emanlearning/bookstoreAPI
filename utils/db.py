@@ -34,14 +34,11 @@ async def fetch(query, is_one, values):
             out = []
             for row in result:
                 out.append(row)
-                
+
     if TESTING:
         await db.disconnect()
 
     return out
-
-
-
 
 
 # query = ("insert into books(isbn, name, author, year)"

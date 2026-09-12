@@ -42,6 +42,7 @@ async def db_check_personel(username, password):
     else:
         return True
 
+
 async def db_get_book_with_isbn(isbn):
     query = """select * from books where isbn = :isbn"""
     values = {"isbn": isbn}
@@ -50,12 +51,14 @@ async def db_get_book_with_isbn(isbn):
 
     return books
 
+
 async def db_get_author(author_name):
     query = """select * from authors where name = :name"""
     values = {"name": author_name}
 
     author = await fetch(query, True, values)
     return author
+
 
 async def db_get_author_from_id(id):
     query = """select * from authors where id = :id"""
@@ -64,9 +67,9 @@ async def db_get_author_from_id(id):
     author = await fetch(query, True, values)
     return author
 
+
 async def db_patch_author_name(id, name):
     query = """update authors set name = :name where id = :id"""
     values = {"id": id, "name": name}
 
     await execute(query, False, values)
-

@@ -2,9 +2,12 @@ from passlib.context import CryptContext
 from models.jwt_user import JWTUser
 from datetime import datetime, timedelta
 from utils.const import (
-                         JWT_SECRET_KEY,
-                         JWT_ALGORITHM,
-                         JWT_EXPIRATION_TIME_MINUTES
+    JWT_SECRET_KEY,
+    JWT_ALGORITHM,
+    JWT_EXPIRATION_TIME_MINUTES,
+    JWT_WRONG_ROLE,
+    JWT_EXPIRED_MSG,
+    JWT_INVALID_MSG,
 )
 import jwt
 from fastapi import Depends, HTTPException
@@ -17,12 +20,13 @@ from starlette.status import HTTP_401_UNAUTHORIZED
 pwd_context = CryptContext(schemes=["bcrypt"])
 oauth_schema = OAuth2PasswordBearer(tokenUrl="/token")
 
+
 # create hashed password
 def get_hashed_password(password: str):
-    password_bytes = password.encode('utf-8')
+    password_bytes = password.encode("utf-8")
     hashed_password = bcrypt.hashpw(password_bytes, bcrypt.gensalt())
     # Convert bytes to string before returning so it saves correctly in DB
-    return hashed_password.decode('utf-8')
+    return hashed_password.decode("utf-8")
 
 
 # verify hashed password with plain password
@@ -31,8 +35,7 @@ def verify_password(plain_password: str, hashed_password: str):
         # plain_password comes from the login form
         # hashed_password comes from the database
         return bcrypt.checkpw(
-            plain_password.encode('utf-8'),
-            hashed_password.encode('utf-8')
+            plain_password.encode("utf-8"), hashed_password.encode("utf-8")
         )
     except Exception as e:
         print(f"Error verifying password: {e}")
@@ -40,7 +43,7 @@ def verify_password(plain_password: str, hashed_password: str):
 
 
 # Authenticate username and password to give JWT token
-async def authenticate_user(user:JWTUser):
+async def authenticate_user(user: JWTUser):
     # hashed_password = get_hashed_password(user.password)
     # user.password = hashed_password
 
@@ -60,9 +63,7 @@ async def authenticate_user(user:JWTUser):
 # Create access JWT token
 def create_jwt_token(user: JWTUser):
     expiration = datetime.utcnow() + timedelta(minutes=JWT_EXPIRATION_TIME_MINUTES)
-    jwt_payload = {"sub": user.username,
-                   "role": user.role,
-                   "exp": expiration}
+    jwt_payload = {"sub": user.username, "role": user.role, "exp": expiration}
     jwt_token = jwt.encode(jwt_payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
 
     return jwt_token
@@ -79,10 +80,20 @@ async def check_jwt_token(token: str = Depends(oauth_schema)):
             is_valid = await db_check_jwt_username(username)
             if is_valid:
                 return final_checks(role)
-    except Exception as e:
-        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="error in security.py/check_jwt_token")
+            else:
+                raise HTTPException(
+                    status_code=HTTP_401_UNAUTHORIZED, detail=JWT_WRONG_ROLE
+                )
+        else:
+            raise HTTPException(
+                status_code=HTTP_401_UNAUTHORIZED, detail=JWT_EXPIRED_MSG
+            )
 
-    raise HTTPException(status_code=HTTP_401_UNAUTHORIZED)
+    except Exception as e:
+        raise HTTPException(
+            status_code=HTTP_401_UNAUTHORIZED,
+            detail="error in security.py/check_jwt_token",
+        )
 
 
 # Last checking and returning the final result
@@ -90,6 +101,7 @@ def final_checks(role: str):
     if role == "admin":
         return True
     else:
-        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED)
+        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail=JWT_WRONG_ROLE)
 
-# print(get_hashed_password("test"))
+
+# print(get_hashed_password("secret"))

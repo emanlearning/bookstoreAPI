@@ -1,0 +1,9 @@
+server {
+     listen 80;
+
+     server_name bookstores.live;
+
+     location / {
+            proxy_pass http://172.29.194.214:3000/;
+     }
+}
